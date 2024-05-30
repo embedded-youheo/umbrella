@@ -4,9 +4,11 @@ from django.db import models
 class UltrasonicData(models.Model):
     id = models.AutoField(primary_key=True)
     timestamp = models.DateTimeField()
+    # distance 필드 추가 - 2024.05.31 (hwan)
+    distance = models.FloatField()
 
     def __str__(self):
-        return f"UltrasonicData {self.id} at {self.timestamp}"
+        return f"UltrasonicData {self.id} at {self.timestamp} with distance {self.distance}"
 
 # 온습도 센서 데이터 저장 테이블
 class TemperatureHumidityData(models.Model):
