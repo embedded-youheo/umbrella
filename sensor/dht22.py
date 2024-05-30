@@ -1,8 +1,12 @@
+import sys
 import os
 import django
 import time
 import board
 import adafruit_dht
+from django.db import transaction
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 # Django 프로젝트 설정 파일을 불러오기
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "umbrella.settings")
@@ -34,6 +38,7 @@ while True:
                 humidity=humidity,
                 timestamp=time.strftime('%Y-%m-%d %H:%M:%S')  # 현재 시간을 문자열로 포맷
             )
+            transaction.commit()
             print("Data saved successfully")
 
     except RuntimeError as error:
