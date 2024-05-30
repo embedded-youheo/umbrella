@@ -27,7 +27,7 @@ while True:
         )
 
         # Check if humidity is above a certain threshold
-        if humidity > 60:  # 예시로 습도가 60% 이상인 경우
+        if humidity > 30:  # 예시로 습도가 60% 이상인 경우
             # 데이터베이스에 저장
             TemperatureHumidityData.objects.create(
                 temperature=temperature_c,
