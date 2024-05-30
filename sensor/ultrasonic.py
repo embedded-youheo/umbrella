@@ -1,5 +1,17 @@
 import time
 import RPi.GPIO as GPIO
+import sys
+import os
+import django
+from django.db import transaction
+
+# Django 프로젝트 설정 파일을 불러오기
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "umbrella.settings")
+django.setup()
+
+# Django 모델을 불러오기
+from umbrellaapp.models import UltrasonicData
 
 trigPin = 18  # gpio 26, pin 5 of J25
 echoPin = 21   # gpio J16 - pin3, GPIO 23
@@ -30,57 +42,20 @@ try:
         distance = get_distance()
         if distance != -1:
             print("Distance: {:.2f} cm".format(distance))
+            if distance <= 30:
+                # 데이터베이스에 저장
+                UltrasonicData.objects.create(
+                    distance=distance,
+                    timestamp=time.strftime('%Y-%m-%d %H:%M:%S')  # 현재 시간을 문자열로 포맷
+                )
+                transaction.commit()
+                print("Data saved successfully")
         else:
             print("Measurement timeout")
         time.sleep(0.2)
 
 except KeyboardInterrupt:
     GPIO.cleanup()
-
-# import RPi.GPIO as gpio
-# import time
-# import sys
-# import warnings
-# warnings.filterwarnings('ignore')
-# LED = 19
-# TRIGER = 18
-# ECHO = 21
-
-# gpio.setmode(gpio.BCM)
-# gpio.setup(TRIGER, gpio.OUT)
-# gpio.setup(ECHO,gpio.IN)
-# gpio.setup(LED, gpio.OUT)
-# startTime = time.time()
-
-# try:
-#     while True:
-#         gpio.output(TRIGER,gpio.LOW)
-#         time.sleep(0.1)
-#         gpio.output(TRIGER,gpio.HIGH)
-#         time.sleep(0.00002)
-#         gpio.output(TRIGER,gpio.LOW)
-
-#         while gpio.input(ECHO) == gpio.LOW:
-#             startTime = time.time()
-
-#         while gpio.input(ECHO) == gpio.HIGH:
-#             endTime = time.time()
-
-#         period = endTime - startTime
-#         dist1 = round(period * 1000000 / 58, 2)
-#         print(dist1)
-#         dist2 = round(period * 17241, 2)
-#         print(dist2)
-#         try:
-#             if dist2 <= 20:
-#                 print('error124')
-#                 gpio.output(LED, gpio.HIGH)
-#                 time.sleep(1)
-#                 gpio.output(LED, gpio.LOW)
-#                 time.sleep(1)
-#         except KeyboardInterrupt:
-#             print("error")
-#         print('Dist1', dist1, 'cm', ', Dist2', dist2, 'cm')
-# except KeyboardInterrupt:
-#     gpio.cleanup()
-#     sys.exit()
+except Exception as error:
+    GPIO.cleanup()
+    raise error
