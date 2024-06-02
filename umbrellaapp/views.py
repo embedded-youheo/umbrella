@@ -43,8 +43,7 @@ def control_buzzer(request):
 def control_fan(request):
     if request.method == 'POST':
         try:
-            print(request.data)
-            data = json.loads(request.body)
+            data = request.data
             fan_state = data.get('state')
             
             if fan_state is not None:
@@ -52,7 +51,7 @@ def control_fan(request):
                 return Response({'message': 'Fan controlled'}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Invalid state value'}, status=status.HTTP_400_BAD_REQUEST)
-        except json.JSONDecodeError:
+        except:
             return Response({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response({'error': 'Invalid method'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
