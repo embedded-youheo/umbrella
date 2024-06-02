@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import TemperatureHumidityData, UltrasonicData, EventLog, Notification, SystemSettings
 from .serializers import TemperatureHumidityDataSerializer, UltrasonicDataSerializer, EventLogSerializer, NotificationSerializer, SystemSettingsSerializer
+from sensor.fan import control_fan
 
 # 온습도 데이터 저장
 @api_view(['POST'])
@@ -38,10 +39,26 @@ def control_buzzer(request):
     return Response({'message': 'Buzzer controlled'}, status=status.HTTP_200_OK)
 
 # 팬 제어 (단순히 상태를 반환하는 예제)
+# @api_view(['POST'])
+# def control_fan(request):
+#     # request body 깜 => $$$(   불리언)
+#     $$$ = equest body 깜 
+#     ~($$$)
+#     # 특정 조건 처리 로직을 여기에 추가
+#     return Response({'message': 'Fan controlled'}, status=status.HTTP_200_OK)
 @api_view(['POST'])
-def control_fan(request):
-    # 특정 조건 처리 로직을 여기에 추가
-    return Response({'message': 'Fan controlled'}, status=status.HTTP_200_OK)
+def control_fan_view(request):
+    try:
+        data = json.loads(request.body)
+        fan_state = data.get('state')
+        
+        if fan_state is not None:
+            control_fan(fan_state)
+            return Response({'message': 'Fan controlled'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Invalid state value'}, status=status.HTTP_400_BAD_REQUEST)
+    except json.JSONDecodeError:
+        return Response({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
 
 # 시스템 설정 조회 및 업데이트
 @api_view(['GET', 'POST'])
