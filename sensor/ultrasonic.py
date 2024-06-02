@@ -12,6 +12,7 @@ django.setup()
 
 # Django 모델을 불러오기
 from umbrellaapp.models import UltrasonicData, EventLog
+from umbrellaapp.constants import PASS_EVENT, ULTRA_SONIC_DISTANCE_THRESHOLD
 
 sensor_type = "ULTRA_SONIC"
 trigPin = 18  # gpio 26, pin 5 of J25
@@ -44,10 +45,10 @@ try:
         if distance != -1:
             print("Distance: {:.2f} cm".format(distance))
             # 이벤트 로그 테이블에 저장
-            if distance <= 50:
+            if distance <= ULTRA_SONIC_DISTANCE_THRESHOLD:
                 EventLog.objects.create(
                     sensor_type=sensor_type,
-                    log_message="물체 지나감 감지",
+                    log_message=PASS_EVENT,
                     timestamp=time.strftime('%Y-%m-%d %H:%M:%S')  # 현재 시간을 문자열로 포맷
                 )
                 transaction.commit()
