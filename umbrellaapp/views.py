@@ -5,6 +5,13 @@ from .models import TemperatureHumidityData, UltrasonicData, EventLog, Notificat
 from .serializers import TemperatureHumidityDataSerializer, UltrasonicDataSerializer, EventLogSerializer, NotificationSerializer, SystemSettingsSerializer
 from sensor.fan import set_fan_state
 
+from django.core.cache import cache
+from rest_framework.views import APIView
+from django.http import StreamingHttpResponse
+from django.shortcuts import render
+import time
+import datetime
+
 # 온습도 데이터 저장
 @api_view(['POST'])
 def save_temperature_humidity_data(request):
@@ -87,3 +94,14 @@ def notifications(request):
         notifications = Notification.objects.all()
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
+
+def humid_event_sse(request):
+    def event_stream():
+        while True:
+            message = cache.get('sse_message')
+            print('메시지', message)
+            if message:
+                yield f'data: {message}\n\n'
+                cache.delete('sse_message')
+            time.sleep(1)
+    return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
