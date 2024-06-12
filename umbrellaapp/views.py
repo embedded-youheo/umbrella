@@ -4,13 +4,13 @@ from rest_framework.response import Response
 from .models import TemperatureHumidityData, UltrasonicData, EventLog, Notification, SystemSettings
 from .serializers import TemperatureHumidityDataSerializer, UltrasonicDataSerializer, EventLogSerializer, NotificationSerializer, SystemSettingsSerializer
 from sensor.fan import set_fan_state
+from sensor.buzzer import turn_on_buzzer
 
 from django.core.cache import cache
 from rest_framework.views import APIView
 from django.http import StreamingHttpResponse
 from django.shortcuts import render
 import time
-import datetime
 
 # 온습도 데이터 저장
 @api_view(['POST'])
@@ -52,7 +52,7 @@ def control_fan(request):
         try:
             data = request.data
             fan_state = data.get('state')
-            
+
             if fan_state is not None:
                 set_fan_state(fan_state)
                 return Response({'message': 'Fan controlled'}, status=status.HTTP_200_OK)
@@ -95,13 +95,14 @@ def notifications(request):
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
 
+# SSE: 습도 높을 때 지나감 감지 시 이벤트 메시지 전송
 def humid_event_sse(request):
     def event_stream():
         while True:
             message = cache.get('sse_message')
-            print('메시지', message)
             if message:
                 yield f'data: {message}\n\n'
                 cache.delete('sse_message')
+                turn_on_buzzer()
             time.sleep(1)
     return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
