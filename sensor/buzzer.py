@@ -4,7 +4,7 @@ import time
 buzzer = 20
 
 # 부저 울림
-def turn_on_buzzer(state):
+def turn_on_buzzer():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(buzzer, GPIO.OUT)
     GPIO.setwarnings(False)
