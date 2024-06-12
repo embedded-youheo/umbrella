@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import TemperatureHumidityData, UltrasonicData, EventLog, Notification, SystemSettings
 from .serializers import TemperatureHumidityDataSerializer, UltrasonicDataSerializer, EventLogSerializer, NotificationSerializer, SystemSettingsSerializer
 from sensor.fan import set_fan_state
+from sensor.buzzer import turn_on_buzzer
 
 from django.core.cache import cache
 from rest_framework.views import APIView
@@ -102,5 +103,6 @@ def humid_event_sse(request):
             if message:
                 yield f'data: {message}\n\n'
                 cache.delete('sse_message')
+                turn_on_buzzer()
             time.sleep(1)
     return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
