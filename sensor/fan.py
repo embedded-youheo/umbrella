@@ -14,3 +14,4 @@ def set_fan_state(state):
     
     # GPIO 정리
     GPIO.cleanup()
+

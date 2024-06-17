@@ -39,33 +39,32 @@ def get_distance():
     distance = travelTime * 17000
     return distance
 
-try:
-    while True:
-        distance = get_distance()
-        if distance != -1:
-            print("Distance: {:.2f} cm".format(distance))
-            # 이벤트 로그 테이블에 저장
-            if distance <= ULTRA_SONIC_DISTANCE_THRESHOLD:
-                EventLog.objects.create(
-                    sensor_type=sensor_type,
-                    log_message=PASS_EVENT,
+def observe_entry_exit():
+    try:
+        while True:
+            distance = get_distance()
+            if distance != -1:
+                print("Distance: {:.2f} cm".format(distance))
+                # 이벤트 로그 테이블에 저장
+                if distance <= ULTRA_SONIC_DISTANCE_THRESHOLD:
+                    EventLog.objects.create(
+                        sensor_type=sensor_type,
+                        log_message=PASS_EVENT,
+                        timestamp=time.strftime('%Y-%m-%d %H:%M:%S')  # 현재 시간을 문자열로 포맷
+                    )
+                    transaction.commit()
+                # 초음파 센서 테이블에 저장
+                UltrasonicData.objects.create(
+                    distance=distance,
                     timestamp=time.strftime('%Y-%m-%d %H:%M:%S')  # 현재 시간을 문자열로 포맷
                 )
                 transaction.commit()
-                print("Data saved successfully")
-            # 초음파 센서 테이블에 저장
-            UltrasonicData.objects.create(
-                distance=distance,
-                timestamp=time.strftime('%Y-%m-%d %H:%M:%S')  # 현재 시간을 문자열로 포맷
-            )
-            transaction.commit()
-            print("Data saved successfully")
-        else:
-            print("Measurement timeout")
-        time.sleep(0.2)
+            else:
+                print("Measurement timeout")
+            time.sleep(0.2)
 
-except KeyboardInterrupt:
-    GPIO.cleanup()
-except Exception as error:
-    GPIO.cleanup()
-    raise error
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+    except Exception as error:
+        GPIO.cleanup()
+        raise error

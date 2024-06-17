@@ -9,8 +9,8 @@ def turn_on_buzzer():
     GPIO.setup(buzzer, GPIO.OUT)
     GPIO.setwarnings(False)
 
-    pwm = GPIO.PWM(buzzer, 1.0)
     pwm.start(50.0)
+    pwm = GPIO.PWM(buzzer, 1.0)
 
     for cnt in range(0,3):
         pwm.ChangeFrequency(262)
