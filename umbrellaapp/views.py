@@ -53,6 +53,8 @@ def control_fan(request):
             data = request.data
             fan_state = data.get('state')
 
+            print(request)
+            print(data)
             if fan_state is not None:
                 set_fan_state(fan_state)
                 return Response({'message': 'Fan controlled'}, status=status.HTTP_200_OK)
@@ -103,6 +105,6 @@ def humid_event_sse(request):
             if message:
                 yield f'data: {message}\n\n'
                 cache.delete('sse_message')
-                turn_on_buzzer()
+                # turn_on_buzzer()
             time.sleep(1)
     return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
